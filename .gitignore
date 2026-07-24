@@ -1,0 +1,34 @@
+# RAD Studio / Delphi
+*.dcu
+*.exe
+*.apk
+*.aab
+*.dres
+*.map
+*.stat
+*.local
+*.identcache
+*.projdata
+*.tvsconfig
+*.dsk
+*.dof
+
+# Pastas geradas pelo compilador
+__history/
+__recovery/
+Android/
+Win32/
+Win64/
+iOSDevice32/
+iOSDevice64/
+iOSSimulator/
+OSX32/
+OSX64/
+
+# Backup do IDE
+*~
+*.bak
+
+# Sistema operacional
+.DS_Store
+Thumbs.db

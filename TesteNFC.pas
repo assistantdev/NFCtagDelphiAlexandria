@@ -30,11 +30,9 @@ type
   TForm1 = class(TForm)
     Button1: TButton;
     MemoLog: TMemo;
-    Label1: TLabel;
     procedure Button1Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
-    procedure FormActivate(Sender: TObject);
   private
     FDispatchActive: Boolean;
     FReaderCallback: TNFCReaderCallback;
@@ -56,9 +54,6 @@ var
 implementation
 
 {$R *.fmx}
-{$R *.XLgXhdpiTb.fmx ANDROID}
-{$R *.LgXhdpiTb.fmx ANDROID}
-{$R *.LgXhdpiPh.fmx ANDROID}
 
 // ===== TNFCReaderCallback =====
 
@@ -105,12 +100,6 @@ begin
   for i := 0 to High(TextBytes) do
     TextBytes[i] := Payload[1 + LangLen + i];
   Result := TEncoding.UTF8.GetString(TextBytes);
-end;
-
-procedure TForm1.FormActivate(Sender: TObject);
-begin
-  if not FDispatchActive then
-    EnableForegroundDispatch;
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
@@ -229,74 +218,36 @@ procedure TForm1.OnTagDiscovered(Tag: JTag);
 var
   TagId: TJavaArray<Byte>;
   TechList: TJavaObjectArray<JString>;
-  NdefTech: JNdef;
-  NdefMsg: JNdefMessage;
-  Records: TJavaObjectArray<JNdefRecord>;
-  Rec: JNdefRecord;
-  Tnf: SmallInt;
-  Payload: TJavaArray<Byte>;
   i: Integer;
-  Techs, Texto: string;
+  Techs: string;
 begin
-  // Leitura NDEF fora do Synchronize - operacao de IO nao pode ser na UI thread
-  try
-    // Conecta na tech Ndef da tag
-    NdefTech := TJNdef.JavaClass.get(Tag);
-    if Assigned(NdefTech) then
-    begin
-      NdefTech.connect;
-      try
-        NdefMsg := NdefTech.getNdefMessage;
-      finally
-        NdefTech.close;
-      end;
-    end
-    else
-      NdefMsg := nil;
-  except
-    NdefMsg := nil;
-  end;
+  TThread.Synchronize(nil,
+  procedure
+  begin
+    MemoLog.Lines.Add('--- Tag detectada (ReaderMode) ---');
 
-  // Leitura do UID e techs (sem IO)
-  TagId := Tag.getId;
-  TechList := Tag.getTechList;
-  Techs := '';
-  if Assigned(TechList) then
-    for i := 0 to TechList.Length - 1 do
+    if not Assigned(Tag) then
     begin
-      if Techs <> '' then Techs := Techs + ', ';
-      Techs := Techs + JStringToString(TechList[i]);
+      MemoLog.Lines.Add('Tag invalida.');
+      Exit;
     end;
 
-  // Decodifica registros NDEF antes de sincronizar
-  Texto := '';
-  if Assigned(NdefMsg) then
-  begin
-    Records := NdefMsg.getRecords;
-    if Assigned(Records) then
-      for i := 0 to Records.Length - 1 do
-      begin
-        Rec := Records[i];
-        if not Assigned(Rec) then Continue;
-        Tnf := Rec.getTnf;
-        Payload := Rec.getPayload;
-        if Tnf = 1 then
-          Texto := Texto + 'Texto: ' + DecodeNdefText(Payload) + sLineBreak
-        else
-          Texto := Texto + Format('TNF=%d Hex: %s', [Tnf, BytesToHex(Payload)]) + sLineBreak;
-      end;
-  end;
+    // UID da tag
+    TagId := Tag.getId;
+    MemoLog.Lines.Add('Tag UID: ' + BytesToHex(TagId));
 
-  // Atualiza UI
-  TThread.Queue(nil, procedure
-  begin
-    MemoLog.Lines.Add('--- Tag detectada ---');
-    MemoLog.Lines.Add('UID: ' + BytesToHex(TagId));
-    MemoLog.Lines.Add('Techs: ' + Techs);
-    if Texto <> '' then
-      MemoLog.Lines.Add(Texto)
-    else
-      MemoLog.Lines.Add('Sem conteudo NDEF.');
+    // Tecnologias suportadas
+    TechList := Tag.getTechList;
+    if Assigned(TechList) then
+    begin
+      Techs := '';
+      for i := 0 to TechList.Length - 1 do
+      begin
+        if Techs <> '' then Techs := Techs + ', ';
+        Techs := Techs + JStringToString(TechList[i]);
+      end;
+      MemoLog.Lines.Add('Techs: ' + Techs);
+    end;
   end);
 end;
 
