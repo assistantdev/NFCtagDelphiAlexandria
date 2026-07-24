@@ -1,0 +1,51 @@
+object Form1: TForm1
+  Left = 0
+  Top = 0
+  Caption = 'Form1'
+  ClientHeight = 528
+  ClientWidth = 360
+  WindowState = wsMaximized
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  OnActivate = FormActivate
+  DesignerMasterStyle = 0
+  object Button1: TButton
+    Anchors = [akLeft, akTop, akRight]
+    StyledSettings = [Family, FontColor]
+    Position.X = 8.000000000000000000
+    Position.Y = 8.000000000000000000
+    Size.Width = 344.000000000000000000
+    Size.Height = 87.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 0
+    Text = 'Verifique NFC'
+    TextSettings.Font.Size = 16.000000000000000000
+    TextSettings.Font.StyleExt = {00070000000000000004000000}
+    OnClick = Button1Click
+  end
+  object MemoLog: TMemo
+    Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
+    DataDetectorTypes = []
+    TextSettings.WordWrap = True
+    Anchors = [akLeft, akTop, akRight, akBottom]
+    Position.X = 8.000000000000000000
+    Position.Y = 105.000000000000000000
+    Size.Width = 344.000000000000000000
+    Size.Height = 395.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 1
+    Viewport.Width = 340.000000000000000000
+    Viewport.Height = 391.000000000000000000
+  end
+  object Label1: TLabel
+    Anchors = [akLeft, akBottom]
+    Position.X = 10.000000000000000000
+    Position.Y = 503.000000000000000000
+    Size.Width = 294.000000000000000000
+    Size.Height = 25.000000000000000000
+    Size.PlatformDefault = False
+    Text = 'Powered by '#174#65039'Assistant Tecno'
+    TabOrder = 2
+  end
+end

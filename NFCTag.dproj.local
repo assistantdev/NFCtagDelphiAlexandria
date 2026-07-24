@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2026/01/19 10:20:10.000.041,=D:\Daniel\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2026/06/24 10:42:49.000.128,=D:\Daniel\Documents\Embarcadero\Studio\Projects\Unit4.pas</Transaction>
+    <Transaction>2026/07/24 11:20:34.614,=D:\Daniel\Documents\Embarcadero\Studio\Projects\Unit4.pas</Transaction>
+    <Transaction>2026/07/24 11:22:51.293,D:\Daniel\Documents\Embarcadero\Studio\Projects\Main.fmx=D:\Daniel\Documents\Embarcadero\Studio\Projects\Unit4.fmx</Transaction>
+    <Transaction>2026/07/24 11:22:51.293,D:\Daniel\Documents\Embarcadero\Studio\Projects\Main.pas=D:\Daniel\Documents\Embarcadero\Studio\Projects\Unit4.pas</Transaction>
+    <Transaction>2026/07/24 11:23:04.352,=D:\Daniel\Documents\Embarcadero\Studio\Projects\Unit4.pas</Transaction>
+    <Transaction>2026/07/24 11:23:12.326,D:\Daniel\Documents\Embarcadero\Studio\Projects\NFC.pas=D:\Daniel\Documents\Embarcadero\Studio\Projects\Unit4.pas</Transaction>
+    <Transaction>2026/07/24 11:28:29.477,=D:\Daniel\Documents\Embarcadero\Studio\Projects\Unit4.pas</Transaction>
+    <Transaction>2026/07/24 11:29:02.916,D:\Daniel\Documents\Embarcadero\Studio\Projects\Androidapi.JNI.NFC.pas=D:\Daniel\Documents\Embarcadero\Studio\Projects\Unit4.pas</Transaction>
+    <Transaction>2026/07/24 11:37:24.835,=C:\Program Files (x86)\Embarcadero\Studio\22.0\bin\converters\java2op\Androidapi.JNI.NFC.pas</Transaction>
+    <Transaction>2026/07/24 11:51:54.833,D:\Desenvolvedor\Laboratório\NFC tag\Main.pas=D:\Daniel\Documents\Embarcadero\Studio\Projects\Main.pas</Transaction>
+    <Transaction>2026/07/24 11:51:54.833,D:\Desenvolvedor\Laboratório\NFC tag\Main.fmx=D:\Daniel\Documents\Embarcadero\Studio\Projects\Main.fmx</Transaction>
+    <Transaction>2026/07/24 11:51:56.871,D:\Desenvolvedor\Laboratório\NFC tag\NFC.pas=D:\Daniel\Documents\Embarcadero\Studio\Projects\NFC.pas</Transaction>
+    <Transaction>2026/07/24 11:52:02.160,D:\Desenvolvedor\Laboratório\NFC tag\NFCTag.dproj=D:\Daniel\Documents\Embarcadero\Studio\Projects\Project1.dproj</Transaction>
+    <Transaction>2026/07/24 15:25:40.723,=D:\Desenvolvedor\Laboratório\NFC tag\Unit1.pas</Transaction>
+    <Transaction>2026/07/24 15:25:51.561,D:\Desenvolvedor\Laboratório\NFC tag\UMainNFC.pas=D:\Desenvolvedor\Laboratório\NFC tag\Unit1.pas</Transaction>
+    <Transaction>2026/07/24 15:28:20.573,=D:\Desenvolvedor\Laboratório\NFC tag\Unit1.pas</Transaction>
+    <Transaction>2026/07/24 15:28:34.720,D:\Desenvolvedor\Laboratório\NFC tag\TesteNFC.fmx=D:\Desenvolvedor\Laboratório\NFC tag\Unit1.fmx</Transaction>
+    <Transaction>2026/07/24 15:28:34.720,D:\Desenvolvedor\Laboratório\NFC tag\TesteNFC.pas=D:\Desenvolvedor\Laboratório\NFC tag\Unit1.pas</Transaction>
+    <Transaction>2026/07/24 15:30:28.624,D:\Desenvolvedor\Laboratório\NFC tag\UMainNFC.pas=</Transaction>
+    <Transaction>2026/07/24 15:35:03.811,D:\Desenvolvedor\Laboratório\NFC tag\Main.pas=</Transaction>
+    <Transaction>2026/07/24 15:35:10.210,D:\Desenvolvedor\Laboratório\NFC tag\NFC.pas=</Transaction>
+    <Transaction>2026/07/24 15:35:39.448,C:\Program Files (x86)\Embarcadero\Studio\22.0\bin\converters\java2op\Androidapi.JNI.NFC.pas=</Transaction>
+    <Transaction>2026/07/24 15:35:43.317,=D:\Desenvolvedor\Laboratório\NFC tag\Androidapi.JNI.NFC.pas</Transaction>
+  </Transactions>  <ActiveMobileDevice>   <NoProfile Android64="RQ8T103LH6L" Android=""/>
+  </ActiveMobileDevice>
+</BorlandProject>
