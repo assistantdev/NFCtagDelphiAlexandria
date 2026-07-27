@@ -50,10 +50,13 @@ procedure TForm1.FormActivate(Sender: TObject);
 begin
   if not Assigned(FNFC) then
     FNFC := TNFC.Create(FOnTagDetectada);
-  if FNFC.Suportado and FNFC.Habilitado then
-    FNFC.Ativar
-  else
-    MemoLog.Lines.Add('NFC nao disponivel ou desligado.');
+  TThread.Queue(nil, procedure
+  begin
+    if FNFC.Suportado and FNFC.Habilitado then
+      FNFC.Ativar
+    else
+      MemoLog.Lines.Add('NFC nao disponivel ou desligado.');
+  end);
 end;
 
 procedure TForm1.FormDeactivate(Sender: TObject);
