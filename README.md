@@ -1,79 +1,161 @@
-# NFC Tag Reader — Delphi Alexandria (Android)
+# NFCTag — Delphi Alexandria (Android)
 
-Projeto de teste para leitura de tags NFC em dispositivos Android usando RAD Studio Alexandria (Delphi FMX).
+Projeto de leitura de tags NFC em dispositivos Android usando RAD Studio Alexandria com FMX.
 
-Testado em: **Samsung Galaxy S20 FE — Android 13**
-
----
-
-## O que faz
-
-- Detecta se o hardware NFC está presente e ativo
-- Ativa o modo de leitura em foreground ao abrir o app (`FormActivate`)
-- Lê o UID da tag aproximada
-- Lista as tecnologias suportadas pela tag (ex: NfcA, MifareClassic, Ndef)
-- Decodifica o payload NDEF (registros do tipo RTD_TEXT)
+**Testado em:** Samsung Galaxy S20 FE — Android 13  
+**IDE:** RAD Studio Alexandria  
+**Target SDK:** API 33
 
 ---
 
-## Arquivos do projeto
+## Estrutura do projeto
 
 | Arquivo | Descrição |
 |---|---|
-| `TesteNFC.pas` | Unit principal com lógica de leitura NFC |
+| `TesteNFC.pas` | Form principal — consome a classe `TNFC` |
+| `TesteNFC.fmx` | Layout do form (`btnVerifique` + `MemoLog`) |
+| `uNFC.pas` | Classe `TNFC` — toda a lógica NFC isolada aqui |
 | `Androidapi.JNI.NFC.pas` | Binding JNI customizado com correções para Android 10+ |
-| `TesteNFC.fmx` | Form FMX (Button1 + MemoLog) |
+| `AndroidManifest.template.xml` | Permissões NFC e intent-filters |
 | `NFCTag.dpr` | Projeto Delphi |
-| `AndroidManifest.template.xml` | Manifest com permissões NFC e intent-filters |
 
 ---
 
-## Modificações necessárias no Androidapi.JNI.NFC.pas
+## Como usar
 
-O arquivo padrão do RAD Studio tem vários métodos do `NfcAdapter` declarados incorretamente na interface de **classe** em vez de **instância**. As seguintes correções foram aplicadas:
+### 1. Adicionar `uNFC.pas` ao projeto
+
+Inclua `uNFC` no `uses` do form e declare os fields:
+
+```pascal
+uses uNFC;
+
+type
+  TfrmPrincipal = class(TForm)
+    procedure FormActivate(Sender: TObject);
+    procedure FormDeactivate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+  private
+    NFC: TNFC;
+    procedure OnTagDetectada(const AUID, ATechs, AConteudo: string);
+  end;
+```
+
+### 2. Inicializar no FormActivate
+
+```pascal
+procedure TfrmPrincipal.FormActivate(Sender: TObject);
+begin
+  if not Assigned(NFC) then
+    NFC := TNFC.Create(procedure(AUID, ATechs, AConteudo: string)
+    begin
+      OnTagDetectada(AUID, ATechs, AConteudo);
+    end);
+  if NFC.Suportado and NFC.Habilitado then
+    NFC.Ativar
+  else
+    MemoLog.Lines.Add('NFC nao disponivel ou desligado.');
+end;
+```
+
+### 3. Implementar o callback
+
+```pascal
+procedure TfrmPrincipal.OnTagDetectada(const AUID, ATechs, AConteudo: string);
+begin
+  // AUID     = UID da tag em hexadecimal (ex: "9B252E6A")
+  // ATechs   = tecnologias suportadas (ex: "android.nfc.tech.NfcA, android.nfc.tech.Ndef")
+  // AConteudo = payload NDEF decodificado (texto) ou vazio se sem conteudo
+end;
+```
+
+### 4. Desativar e liberar
+
+```pascal
+procedure TfrmPrincipal.FormDeactivate(Sender: TObject);
+begin
+  if Assigned(NFC) then NFC.Desativar;
+end;
+
+procedure TfrmPrincipal.FormDestroy(Sender: TObject);
+begin
+  FreeAndNil(NFC);
+end;
+```
+
+---
+
+## Classe TNFC
+
+Declarada em `uNFC.pas`. Encapsula toda a lógica JNI de leitura NFC.
+
+### Construtor
+
+```pascal
+constructor TNFC.Create(AOnTagDetectada: TNFCTagDetectadaProc);
+```
+
+`TNFCTagDetectadaProc = TProc<string, string, string>` — callback chamado na UI thread quando uma tag é detectada, recebendo `(UID, Techs, Conteudo)`.
+
+### Métodos públicos
+
+| Método | Descrição |
+|---|---|
+| `Ativar` | Ativa o `enableReaderMode` — app passa a receber tags |
+| `Desativar` | Desativa o `disableReaderMode` |
+| `Suportado: Boolean` | `True` se o dispositivo tem hardware NFC |
+| `Habilitado: Boolean` | `True` se o NFC está ligado nas configurações |
+
+### Funcionamento interno
+
+- `TNFCReaderCallback` implementa `JNfcAdapter_ReaderCallback` via `TJavaLocal`
+- `onTagDiscovered` é chamado pelo Android em thread Java
+- Leitura de UID, techs e payload NDEF ocorre na thread Java (fora da UI)
+- `TThread.Queue` entrega o resultado na UI thread antes de chamar o callback
+- Conexão NDEF: `TJNdef.JavaClass.get(tag)` → `connect` → `getNdefMessage` → `close`
+
+---
+
+## Correções no Androidapi.JNI.NFC.pas
+
+O arquivo padrão do RAD Studio tem métodos declarados incorretamente na interface de **classe** em vez de **instância**. Correções aplicadas:
 
 ### Interface de instância `JNfcAdapter`
 
-Métodos adicionados/movidos para a interface de instância:
-
 ```pascal
-[JavaSignature('android/nfc/NfcAdapter')]
 JNfcAdapter = interface(JObject)
   procedure disableForegroundDispatch(activity: JActivity); cdecl;
-  procedure disableReaderMode(activity: JActivity); cdecl;         // adicionado
-  procedure enableForegroundDispatch(...); cdecl;                   // movido
+  procedure disableReaderMode(activity: JActivity); cdecl;           // adicionado
+  procedure enableForegroundDispatch(...); cdecl;                     // movido
   procedure enableReaderMode(...); cdecl;
-  function isEnabled: Boolean; cdecl;                               // movido
-  ...
+  function isEnabled: Boolean; cdecl;                                 // movido
 end;
 ```
 
 ### Interface de instância `JNdefMessage`
 
 ```pascal
-[JavaSignature('android/nfc/NdefMessage')]
 JNdefMessage = interface(JObject)
-  function getRecords: TJavaObjectArray<JNdefRecord>; cdecl;       // adicionado
-  ...
+  function getRecords: TJavaObjectArray<JNdefRecord>; cdecl;         // adicionado
 end;
 ```
 
 ### Interface de instância `JTag`
 
 ```pascal
-[JavaSignature('android/nfc/Tag')]
 JTag = interface(JObject)
-  function getId: TJavaArray<Byte>; cdecl;                         // adicionado
-  function getTechList: TJavaObjectArray<JString>; cdecl;          // adicionado
-  ...
+  function getId: TJavaArray<Byte>; cdecl;                           // adicionado
+  function getTechList: TJavaObjectArray<JString>; cdecl;            // adicionado
 end;
 ```
 
 ### Interface `JNdef` (nova)
 
-Adicionada para leitura de payload NDEF diretamente da tag:
-
 ```pascal
+JNdefClass = interface(JObjectClass)
+  {class} function get(tag: JTag): JNdef; cdecl;
+end;
+
 [JavaSignature('android/nfc/tech/Ndef')]
 JNdef = interface(JObject)
   procedure close; cdecl;
@@ -86,18 +168,6 @@ TJNdef = class(TJavaGenericImport<JNdefClass, JNdef>) end;
 
 ---
 
-## Pontos importantes
-
-- `isNdefPushEnabled` foi removido do Android 10+ — usar `isEnabled` na instância
-- `enableForegroundDispatch` com `PendingIntent` requer `FLAG_IMMUTABLE` (`$04000000`) no Android 12+
-- `enableReaderMode` é a API moderna recomendada em vez de `enableForegroundDispatch`
-- O callback `onTagDiscovered` vem de uma thread Java — usar `TThread.Queue` para acessar a UI
-- Operações de I/O NFC (`connect`, `getNdefMessage`, `close`) devem ficar **fora** do `TThread.Queue`
-- `TJavaObjectArray` não suporta `for..in` — usar `for i := 0 to Length - 1`
-- `getDefaultAdapter` deve ser chamado como variável local, não como field inicializado no `FormCreate`
-
----
-
 ## AndroidManifest
 
 ```xml
@@ -105,10 +175,18 @@ TJNdef = class(TJavaGenericImport<JNdefClass, JNdef>) end;
 <uses-feature android:name="android.hardware.nfc" android:required="false"/>
 ```
 
+Intent-filters configurados para `NDEF_DISCOVERED`, `TAG_DISCOVERED` e `TECH_DISCOVERED` com `priority="1000"`.
+
 ---
 
-## Requisitos
+## Pontos importantes
 
-- RAD Studio Alexandria
-- Android SDK Target: API 33 (Android 13)
-- Dispositivo com NFC habilitado
+| Problema | Solução |
+|---|---|
+| `isNdefPushEnabled` sempre falso no Android 10+ | Usar `isEnabled` na instância |
+| `enableForegroundDispatch` com `FLAG_MUTABLE` causa exceção no Android 12+ | Usar `FLAG_IMMUTABLE` (`$04000000`) ou `enableReaderMode` |
+| `TJavaObjectArray` não suporta `for..in` | Usar `for i := 0 to Length - 1` |
+| `Assigned(GetAdapter)` não compila | Usar variável local intermediária |
+| `getDefaultAdapter` retorna nil no `FormCreate` | Chamar sempre como variável local, nunca como field inicializado no `FormCreate` |
+| Callback `onTagDiscovered` vem de thread Java | Usar `TThread.Queue` para acessar UI |
+| Operações de I/O NFC (`connect`, `getNdefMessage`) | Executar fora do `TThread.Queue`, na thread Java |
