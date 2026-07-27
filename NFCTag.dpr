@@ -4,7 +4,8 @@ uses
   System.StartUpCopy,
   FMX.Forms,
   TesteNFC in 'TesteNFC.pas' {Form1},
-  Androidapi.JNI.NFC in 'Androidapi.JNI.NFC.pas';
+  Androidapi.JNI.NFC in 'Androidapi.JNI.NFC.pas',
+  uNFC in 'uNFC.pas';
 
 {$R *.res}
 
