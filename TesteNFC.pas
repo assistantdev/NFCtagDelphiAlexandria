@@ -14,11 +14,12 @@ type
     Button1: TButton;
     MemoLog: TMemo;
     procedure Button1Click(Sender: TObject);
-    procedure FormCreate(Sender: TObject);
+    procedure FormActivate(Sender: TObject);
+    procedure FormDeactivate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
   private
     FNFC: TNFC;
-    FOnTagDetectada: TNFCTagDetectadaProc;
+    procedure OnTagDetectada(const AUID, ATechs, AConteudo: string);
   public
   end;
 
@@ -29,19 +30,23 @@ implementation
 
 {$R *.fmx}
 
-procedure TForm1.FormCreate(Sender: TObject);
+procedure TForm1.FormActivate(Sender: TObject);
 begin
-  FNFC := nil;
-  FOnTagDetectada := procedure(AUID, ATechs, AConteudo: string)
-  begin
-    MemoLog.Lines.Add('--- Tag detectada ---');
-    MemoLog.Lines.Add('UID: ' + AUID);
-    MemoLog.Lines.Add('Techs: ' + ATechs);
-    if AConteudo <> '' then
-      MemoLog.Lines.Add('Conteudo: ' + AConteudo)
-    else
-      MemoLog.Lines.Add('Sem conteudo NDEF.');
-  end;
+  if not Assigned(FNFC) then
+    FNFC := TNFC.Create(procedure(AUID, ATechs, AConteudo: string)
+    begin
+      OnTagDetectada(AUID, ATechs, AConteudo);
+    end);
+  if FNFC.Suportado and FNFC.Habilitado then
+    FNFC.Ativar
+  else
+    MemoLog.Lines.Add('NFC nao disponivel ou desligado.');
+end;
+
+procedure TForm1.FormDeactivate(Sender: TObject);
+begin
+  if Assigned(FNFC) then
+    FNFC.Desativar;
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
@@ -52,9 +57,11 @@ end;
 procedure TForm1.Button1Click(Sender: TObject);
 begin
   MemoLog.Lines.Clear;
-
   if not Assigned(FNFC) then
-    FNFC := TNFC.Create(FOnTagDetectada);
+    FNFC := TNFC.Create(procedure(AUID, ATechs, AConteudo: string)
+    begin
+      OnTagDetectada(AUID, ATechs, AConteudo);
+    end);
 
   if not FNFC.Suportado then
   begin
@@ -72,7 +79,18 @@ begin
 
   MemoLog.Lines.Add('NFC LIGADO');
   FNFC.Ativar;
-  MemoLog.Lines.Add('Pronto! Aproxime uma tag NFC.');
+  MemoLog.Lines.Add('Aguardando tag...');
+end;
+
+procedure TForm1.OnTagDetectada(const AUID, ATechs, AConteudo: string);
+begin
+  MemoLog.Lines.Add('--- Tag detectada ---');
+  MemoLog.Lines.Add('UID: ' + AUID);
+  MemoLog.Lines.Add('Techs: ' + ATechs);
+  if AConteudo <> '' then
+    MemoLog.Lines.Add('Conteudo: ' + AConteudo)
+  else
+    MemoLog.Lines.Add('Sem conteudo NDEF.');
 end;
 
 end.
