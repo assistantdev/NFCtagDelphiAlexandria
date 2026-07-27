@@ -33,7 +33,10 @@ implementation
 procedure TForm1.FormActivate(Sender: TObject);
 begin
   if not Assigned(FNFC) then
-    FNFC := TNFC.Create(OnTagDetectada);
+    FNFC := TNFC.Create(procedure(AUID, ATechs, AConteudo: string)
+    begin
+      OnTagDetectada(AUID, ATechs, AConteudo);
+    end);
   if FNFC.Suportado and FNFC.Habilitado then
     FNFC.Ativar
   else
@@ -55,7 +58,10 @@ procedure TForm1.Button1Click(Sender: TObject);
 begin
   MemoLog.Lines.Clear;
   if not Assigned(FNFC) then
-    FNFC := TNFC.Create(OnTagDetectada);
+    FNFC := TNFC.Create(procedure(AUID, ATechs, AConteudo: string)
+    begin
+      OnTagDetectada(AUID, ATechs, AConteudo);
+    end);
 
   if not FNFC.Suportado then
   begin
