@@ -3,7 +3,7 @@ program NFCTag;
 uses
   System.StartUpCopy,
   FMX.Forms,
-  TesteNFC in 'TesteNFC.pas' {Form1},
+  TesteNFC in 'TesteNFC.pas' {frmPrincipal},
   Androidapi.JNI.NFC in 'Androidapi.JNI.NFC.pas',
   uNFC in 'uNFC.pas';
 
@@ -11,6 +11,6 @@ uses
 
 begin
   Application.Initialize;
-  Application.CreateForm(TForm1, Form1);
+  Application.CreateForm(TfrmPrincipal, frmPrincipal);
   Application.Run;
 end.

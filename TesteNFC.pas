@@ -10,60 +10,60 @@ uses
   uNFC;
 
 type
-  TForm1 = class(TForm)
-    Button1: TButton;
+  TfrmPrincipal = class(TForm)
+    btnVerifique: TButton;
     MemoLog: TMemo;
-    procedure Button1Click(Sender: TObject);
+    procedure btnVerifiqueClick(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure FormDeactivate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
   private
-    FNFC: TNFC;
+    NFC: TNFC;
     procedure OnTagDetectada(const AUID, ATechs, AConteudo: string);
   public
   end;
 
 var
-  Form1: TForm1;
+  frmPrincipal: TfrmPrincipal;
 
 implementation
 
 {$R *.fmx}
 
-procedure TForm1.FormActivate(Sender: TObject);
+procedure TfrmPrincipal.FormActivate(Sender: TObject);
 begin
-  if not Assigned(FNFC) then
-    FNFC := TNFC.Create(procedure(AUID, ATechs, AConteudo: string)
+  if not Assigned(NFC) then
+    NFC := TNFC.Create(procedure(AUID, ATechs, AConteudo: string)
     begin
       OnTagDetectada(AUID, ATechs, AConteudo);
     end);
-  if FNFC.Suportado and FNFC.Habilitado then
-    FNFC.Ativar
+  if NFC.Suportado and NFC.Habilitado then
+    NFC.Ativar
   else
     MemoLog.Lines.Add('NFC nao disponivel ou desligado.');
 end;
 
-procedure TForm1.FormDeactivate(Sender: TObject);
+procedure TfrmPrincipal.FormDeactivate(Sender: TObject);
 begin
-  if Assigned(FNFC) then
-    FNFC.Desativar;
+  if Assigned(NFC) then
+    NFC.Desativar;
 end;
 
-procedure TForm1.FormDestroy(Sender: TObject);
+procedure TfrmPrincipal.FormDestroy(Sender: TObject);
 begin
-  FreeAndNil(FNFC);
+  FreeAndNil(NFC);
 end;
 
-procedure TForm1.Button1Click(Sender: TObject);
+procedure TfrmPrincipal.btnVerifiqueClick(Sender: TObject);
 begin
   MemoLog.Lines.Clear;
-  if not Assigned(FNFC) then
-    FNFC := TNFC.Create(procedure(AUID, ATechs, AConteudo: string)
+  if not Assigned(NFC) then
+    NFC := TNFC.Create(procedure(AUID, ATechs, AConteudo: string)
     begin
       OnTagDetectada(AUID, ATechs, AConteudo);
     end);
 
-  if not FNFC.Suportado then
+  if not NFC.Suportado then
   begin
     MemoLog.Lines.Add('Hardware NFC: AUSENTE');
     Exit;
@@ -71,18 +71,18 @@ begin
 
   MemoLog.Lines.Add('Hardware NFC: PRESENTE');
 
-  if not FNFC.Habilitado then
+  if not NFC.Habilitado then
   begin
     MemoLog.Lines.Add('NFC DESLIGADO - ative nas configuracoes.');
     Exit;
   end;
 
   MemoLog.Lines.Add('NFC LIGADO');
-  FNFC.Ativar;
+  NFC.Ativar;
   MemoLog.Lines.Add('Aguardando tag...');
 end;
 
-procedure TForm1.OnTagDetectada(const AUID, ATechs, AConteudo: string);
+procedure TfrmPrincipal.OnTagDetectada(const AUID, ATechs, AConteudo: string);
 begin
   MemoLog.Lines.Add('--- Tag detectada ---');
   MemoLog.Lines.Add('UID: ' + AUID);
