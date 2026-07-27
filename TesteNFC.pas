@@ -14,12 +14,13 @@ type
     Button1: TButton;
     MemoLog: TMemo;
     procedure Button1Click(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure FormDeactivate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
   private
     FNFC: TNFC;
-    procedure OnTagDetectada(const AUID, ATechs, AConteudo: string);
+    FOnTagDetectada: TNFCTagDetectadaProc;
   public
   end;
 
@@ -30,13 +31,25 @@ implementation
 
 {$R *.fmx}
 
+procedure TForm1.FormCreate(Sender: TObject);
+begin
+  FNFC := nil;
+  FOnTagDetectada := procedure(AUID, ATechs, AConteudo: string)
+  begin
+    MemoLog.Lines.Add('--- Tag detectada ---');
+    MemoLog.Lines.Add('UID: ' + AUID);
+    MemoLog.Lines.Add('Techs: ' + ATechs);
+    if AConteudo <> '' then
+      MemoLog.Lines.Add('Conteudo: ' + AConteudo)
+    else
+      MemoLog.Lines.Add('Sem conteudo NDEF.');
+  end;
+end;
+
 procedure TForm1.FormActivate(Sender: TObject);
 begin
   if not Assigned(FNFC) then
-    FNFC := TNFC.Create(procedure(AUID, ATechs, AConteudo: string)
-    begin
-      OnTagDetectada(AUID, ATechs, AConteudo);
-    end);
+    FNFC := TNFC.Create(FOnTagDetectada);
   if FNFC.Suportado and FNFC.Habilitado then
     FNFC.Ativar
   else
@@ -58,10 +71,7 @@ procedure TForm1.Button1Click(Sender: TObject);
 begin
   MemoLog.Lines.Clear;
   if not Assigned(FNFC) then
-    FNFC := TNFC.Create(procedure(AUID, ATechs, AConteudo: string)
-    begin
-      OnTagDetectada(AUID, ATechs, AConteudo);
-    end);
+    FNFC := TNFC.Create(FOnTagDetectada);
 
   if not FNFC.Suportado then
   begin
@@ -80,17 +90,6 @@ begin
   MemoLog.Lines.Add('NFC LIGADO');
   FNFC.Ativar;
   MemoLog.Lines.Add('Aguardando tag...');
-end;
-
-procedure TForm1.OnTagDetectada(const AUID, ATechs, AConteudo: string);
-begin
-  MemoLog.Lines.Add('--- Tag detectada ---');
-  MemoLog.Lines.Add('UID: ' + AUID);
-  MemoLog.Lines.Add('Techs: ' + ATechs);
-  if AConteudo <> '' then
-    MemoLog.Lines.Add('Conteudo: ' + AConteudo)
-  else
-    MemoLog.Lines.Add('Sem conteudo NDEF.');
 end;
 
 end.
